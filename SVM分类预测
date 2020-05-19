@@ -1,0 +1,51 @@
+import pandas as pd
+from sklearn import svm,preprocessing
+import pandas_datareader.data as web
+from pandas import DataFrame
+import matplotlib.pyplot as plt
+
+startday = '2019-1-1'
+endday = '2019-3-1'
+
+df_CB = web.DataReader("000035.sz","yahoo",startday,endday)
+df_CB = DataFrame.sort_index(df_CB)
+print(df_CB.head())
+
+value = pd.Series(df_CB['Close']-df_CB['Close'].shift(1),index = df_CB.index)
+value = value.bfill()
+value[value>=0] = 1
+value[value<0] = 0
+df_CB['Value'] = value
+df_CB = df_CB.fillna(method = "bfill")
+df_CB = df_CB.astype("float64")
+print(df_CB.head())
+
+Data = df_CB[["High","Low", "Open","Close"]]
+Data = Data.astype(float)
+Data.plot()
+Data.loc['2019-1-1':'2019-3-1'].plot
+plt.rcParams['font.sans-serif']=['SimHei']
+plt.rcParams['axes.unicode_minus']=False
+plt.title("中国天楹股价折线图")
+L = len(df_CB)
+train = int(L*0.8)
+total_predict_data = L-train
+df_CB_X = df_CB.drop(['Value'], axis=1)
+df_CB_X = preprocessing.scale(df_CB_X)
+correct = 0
+train_original = train
+Data_train = df_CB_X[train-train_original:train]
+value_train = value[train-train_original:train]
+while train < L:
+    Data_predict = df_CB_X[train:train+1]
+    value_real = value[train:train+1]
+    classifier = svm.SVC(kernel="linear")
+    classifier.fit(Data_train, value_train)
+    value_predict = classifier.predict(Data_predict)
+    print("value_real=%d value_predict=%d" %(value_real[0],value_predict))
+    if (value_real[0] == int(value_predict)):
+        correct = correct + 1
+    train = train + 1
+
+correct=correct*100/total_predict_data
+print('Correct=%.2f%%'%correct)
