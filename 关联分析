@@ -1,0 +1,24 @@
+import pandas_datareader as pdr
+from warnings import simplefilter
+simplefilter(action='ignore', category=FutureWarning)
+alibaba =pdr.get_data_yahoo("BABA")
+alibaba.head()
+import seaborn as sns
+from datetime import datetime
+start= datetime(2015,8,24)
+alibaba =pdr.get_data_yahoo("BABA",start = start)
+amazon = pdr.get_data_yahoo("AMZN",start = start)
+alibaba.head()
+alibaba["Adj Close"].plot(kind="line",legend=True)
+alibaba["Ali_Adu Close"]=alibaba["Adj Close"]
+amazon["Ama_Adj Close"]= amazon["Adj Close"]
+alibaba["Ali_Adu Close"].plot(legend = True)
+amazon["Ama_Adj Close"].plot(legend= True)
+company =['AAPL','GOOG','MSFT','AMZN','FB']
+top_tech_df = pdr.get_data_yahoo(company)['Adj Close']
+top_tech_df.head()
+top_tech_dr = top_tech_df.pct_change()
+top_tech_dr.head()
+top_tech_df.plot()
+sns.jointplot('AMZN','G00G',top_tech_dr,kind='scatter')
+sns.pairplot(top_tech_dr.dropna())
